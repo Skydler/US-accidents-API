@@ -9,4 +9,4 @@ app.listen(API_PORT, () => {
     console.log(`Server initializating on port ${API_PORT}`);
 });
 
-app.use('/accidents', apiRouter);
+app.use('/', apiRouter);
