@@ -3,11 +3,11 @@ const accidents = require('./accidents');
 
 const router = express.Router();
 
-router.get('/insert', (req, res) => {
-    accidents.insertDocuments();
-    res.send({
-        pepe: "hola",
-        edad: 20,
+router.get('/between', (req, res) => {
+    const start = req.query.start;
+    const end = req.query.end;
+    accidents.searchBetweenDates(start, end, (results) => {
+        res.send(results);
     });
 });
 
