@@ -1,19 +1,15 @@
 require('dotenv').config();
-const MongoClient = require('mongodb').MongoClient;
-const MONGO_URL = process.env.MONGO_URL + process.env.MONGO_DB;
-const client = new MongoClient(MONGO_URL);
+const mongoose = require('mongoose');
 
-function makeConnection(callback) {
-    client.connect((err) => {
-        if (err) {
-            throw err;
-        }
-        const db = client.db();
-        callback(db, function () {
-            client.close();
-        });
-    })
+mongoose.connect(process.env.MONGO_URL + process.env.MONGO_DB, { useNewUrlParser: true })
 
-}
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () { console.log("Connected!!"); });
 
-module.exports = {makeConnection};
+
+// Schema declaration
+const accident_schema = mongoose.Schema({});
+const Accidents = mongoose.model('accident', accident_schema);
+
+module.exports = { Accidents };

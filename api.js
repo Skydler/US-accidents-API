@@ -2,10 +2,11 @@ const express = require("express");
 const accidents = require('./accidents');
 const router = express.Router();
 
-router.get('/:startTime/:endTime', (req, res) => {
-    accidents.insertDocuments();
-    res.send({
-        tarea: "devolver todos los accidentes ocurridos entre 2 fechas dadas"
+router.get('/between', (req, res) => {
+    const start = req.query.start;
+    const end = req.query.end;
+    accidents.searchBetweenDates(start, end, (results) => {
+        res.send(results);
     });
 });
 
