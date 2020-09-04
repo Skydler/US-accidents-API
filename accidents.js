@@ -1,6 +1,6 @@
 const connection = require('./connection.js');
 
-function searchBetweenDates(startDate, endDate, callback) {
+function findBetweenDates(startDate, endDate, callback) {
     const query = {
         $and: [
             { Start_Time: { $gte: startDate } },
@@ -30,11 +30,68 @@ function findAverageDistance(callback) {
             }
         }
     ];
-
     connection.Accidents.aggregate(aggregation, (err, res) => {
         if (err) { throw err }
         callback(res)
     })
 }
 
-module.exports = { searchBetweenDates, findAverageDistance };
+function findAccidentsWithin({longitude, latitude}, radius, callback) {
+    let query = {
+        Start_Loc: {
+            $near: {
+                $geometry: { type: "Point",  coordinates: [ longitude, latitude ] },
+                $maxDistance: radius * 1000
+            }
+        }
+    };
+    connection.Accidents.find(query, (err, res) => {
+        if (err) { throw err }
+        query = {
+            End_Loc: {
+                $near: {
+                    $geometry: { type: "Point",  coordinates: [ longitude, latitude ] },
+                    $maxDistance: radius * 1000
+                }
+            }
+        };
+        const nearStartPointAccidents = res;
+        connection.Accidents.find(query, (err, res) => {
+            if (err) { throw err }
+            callback(Object.assign(res, nearStartPointAccidents));
+        });
+    });
+}
+
+function findMostDangerousPointsWithin({longitude, latitude}, radius, callback) {
+    const aggregation = [
+        {
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                },
+                distanceField: "???",
+                maxDistance: radius * 1000,
+                key: "Start_Loc"
+            }
+        },
+        {
+            $sortByCount: "$Start_Loc.coordinates"
+        },
+        {
+            $limit: 5
+        }
+    ];
+    connection.Accidents.aggregate(aggregation, (err, res) => {
+        if (err) { throw err }
+        callback(Object.assign(res, nearStartPointAccidents));
+    });
+}
+
+module.exports = {
+    findBetweenDates,
+    findAccidentsWithin,
+    findMostDangerousPointsWithin,
+    findAverageDistance
+};
