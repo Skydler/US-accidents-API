@@ -1,16 +1,17 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.MONGO_URL + process.env.MONGO_DB, { useNewUrlParser: true })
+mongoose.connect(process.env.MONGO_URL + process.env.MONGO_DB, { useUnifiedTopology: true, useNewUrlParser: true })
 
 // Schema declaration
 const accident_schema = mongoose.Schema({});
-
 const Accidents = mongoose.model('accident', accident_schema);
+
 const db = mongoose.connection;
+
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
-    console.log("Connected!!");
+    console.info("Connected!!");
 });
 
 // db.accidents.update(
@@ -27,7 +28,7 @@ db.once('open', () => {
 //                     coordinates: {
 //                         $cond: [
 //                             {
-//                                 $eq: ["$End_Lng",""]
+//                                 $eq: ["$End_Lng", ""]
 //                             },
 //                             ['$Start_Lng', '$Start_Lat'],
 //                             ['$End_Lng', '$End_Lat']
@@ -42,7 +43,7 @@ db.once('open', () => {
 //     }
 // );
 
-// db.accidents.createIndex( { Start_Loc: "2dsphere" } );
-// db.accidents.createIndex( { End_Loc: "2dsphere" } );
+// db.accidents.createIndex({ Start_Loc: "2dsphere" });
+// db.accidents.createIndex({ End_Loc: "2dsphere" });
 
 module.exports = { Accidents };

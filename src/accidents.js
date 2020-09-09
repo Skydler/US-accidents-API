@@ -15,9 +15,6 @@ function findBetweenDates(startDate, endDate, callback) {
 
 function findAverageDistance(callback) {
     const aggregation = [
-        // {
-        //     $match: { 'Distance(mi)': { $gte: 0.01 } }    //Use this to only match accidents with some distance
-        // },
         {
             $group: {
                 _id: null, average: { $avg: '$Distance(mi)' }
@@ -36,11 +33,11 @@ function findAverageDistance(callback) {
     })
 }
 
-function findAccidentsWithin({longitude, latitude}, radius, callback) {
+function findAccidentsWithin({ longitude, latitude }, radius, callback) {
     let query = {
         Start_Loc: {
             $near: {
-                $geometry: { type: "Point",  coordinates: [ longitude, latitude ] },
+                $geometry: { type: "Point", coordinates: [longitude, latitude] },
                 $maxDistance: radius * 1000
             }
         }
@@ -50,7 +47,7 @@ function findAccidentsWithin({longitude, latitude}, radius, callback) {
         query = {
             End_Loc: {
                 $near: {
-                    $geometry: { type: "Point",  coordinates: [ longitude, latitude ] },
+                    $geometry: { type: "Point", coordinates: [longitude, latitude] },
                     $maxDistance: radius * 1000
                 }
             }
@@ -63,26 +60,27 @@ function findAccidentsWithin({longitude, latitude}, radius, callback) {
     });
 }
 
-function findMostDangerousPointsWithin({longitude, latitude}, radius, callback) {
+function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback) {
     const aggregation = [
         {
-            $geoNear: {
-                near: {
-                    type: "Point",
-                    coordinates: [longitude, latitude]
+            "$geoNear": {
+                "near": {
+                    "type": "Point",
+                    "coordinates": [longitude, latitude]
                 },
-                distanceField: "???",
-                maxDistance: radius * 1000,
-                key: "Start_Loc"
+                "distanceField": "distanceToCenter",
+                "maxDistance": radius * 1000,
+                "key": "Start_Loc_2dsphere",
             }
         },
         {
-            $sortByCount: "$Start_Loc.coordinates"
+            "$sortByCount": "$Start_Loc.coordinates"
         },
         {
-            $limit: 5
+            "$limit": 5
         }
     ];
+
     connection.Accidents.aggregate(aggregation, (err, res) => {
         if (err) { throw err }
         callback(Object.assign(res, nearStartPointAccidents));

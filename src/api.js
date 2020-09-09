@@ -29,13 +29,13 @@ router.get('/accidentsWithin', (req, res) => {
     if (!longitude || !latitude || !radius) {
         res.sendStatus(404);
     } else {
-        accidents.findAccidentsBetween({longitude, latitude}, radius, (results) => {
+        accidents.findAccidentsWithin({ longitude, latitude }, radius, (results) => {
             res.send(results);
         });
     }
 });
 
-//Receives a geoPoint (latitude and longitude) and a radius (in km) and retrieves the most dangeours points in that area.
+//Receives a geoPoint (latitude and longitude) and a radius (in km) and retrieves the most dangerous points in that area.
 router.get('/mostDangerousPoints', (req, res) => {
     const longitude = req.query.latitude;
     const latitude = req.query.longitude;
@@ -43,7 +43,7 @@ router.get('/mostDangerousPoints', (req, res) => {
     if (!longitude || !latitude || !radius) {
         res.sendStatus(404);
     } else {
-        accidents.findMostDangerousPointsWithin({longitude, latitude}, radius, (results) => {
+        accidents.findMostDangerousPointsWithin({ longitude, latitude }, radius, (results) => {
             res.send(results);
         });
     }
