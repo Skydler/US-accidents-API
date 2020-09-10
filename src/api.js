@@ -37,8 +37,8 @@ router.get('/accidentsWithin', (req, res) => {
 
 //Receives a geoPoint (latitude and longitude) and a radius (in km) and retrieves the most dangerous points in that area.
 router.get('/mostDangerousPoints', (req, res) => {
-    const longitude = req.query.latitude;
-    const latitude = req.query.longitude;
+    const longitude = req.query.longitude;
+    const latitude = req.query.latitude;
     const radius = req.query.radius;
     if (!longitude || !latitude || !radius) {
         res.sendStatus(404);

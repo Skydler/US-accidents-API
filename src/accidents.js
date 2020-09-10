@@ -83,7 +83,7 @@ function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback
 
     connection.Accidents.aggregate(aggregation, (err, res) => {
         if (err) { throw err }
-        callback(Object.assign(res, nearStartPointAccidents));
+        callback(res);
     });
 }
 
