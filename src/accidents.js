@@ -61,30 +61,22 @@ function findAccidentsWithin({ longitude, latitude }, radius, callback) {
 }
 
 function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback) {
-    const aggregation = [
-        {
-            "$geoNear": {
-                "near": {
-                    "type": "Point",
-                    "coordinates": [longitude, latitude]
-                },
-                "distanceField": "distanceToCenter",
-                "maxDistance": radius * 1000,
-                "key": "Start_Loc_2dsphere",
-            }
-        },
-        {
-            "$sortByCount": "$Start_Loc.coordinates"
-        },
-        {
-            "$limit": 5
-        }
-    ];
+    const radiusToKm = radius * 1000;
+    const coords = [parseFloat(longitude), parseFloat(latitude)]
 
-    connection.Accidents.aggregate(aggregation, (err, res) => {
-        if (err) { throw err }
-        callback(res);
-    });
+    connection.Accidents.aggregate()
+        .near({
+            near: { type: "Point", coordinates: coords },
+            distanceField: "distanceToCenter",
+            maxDistance: radiusToKm,
+            key: "Start_Loc"
+        })
+        .sortByCount("Start_Loc.coordinates")
+        .limit(5)
+        .exec((err, res) => {
+            if (err) { throw err }
+            callback(res);
+        });
 }
 
 function findMostCommonWeatherConditions(callback) {
@@ -110,8 +102,8 @@ function findMostCommonLocationConditions(callback) {
 
     Promise.all([
         connection.Accidents.aggregate(timeQuery).allowDiskUse(true).exec(),
-        connection.Accidents.aggregate(cityQuery).allowDiskUse(true).exec(),
-        connection.Accidents.aggregate(stateQuery).allowDiskUse(true).exec(),
+        connection.Accidents.aggregate(cityQuery).exec(),
+        connection.Accidents.aggregate(stateQuery).exec(),
     ]).then(values => callback(values))
 }
 
