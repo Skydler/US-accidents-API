@@ -8,17 +8,13 @@ router.get('/between', (req, res) => {
     const end = req.query.endDate;
     if (!start || !end) res.sendStatus(404);
     else {
-        accidents.findBetweenDates(start, end, (results) => {
-            res.send(results);
-        });
+        accidents.findBetweenDates(start, end, results => res.send(results));
     }
 });
 
-//Retrieves the accidents' most common conditions (temperature, time, etc.).
-router.get('/mostCommonConditions', (req, res) => {
-    res.send({
-        tarea: "determinar las condiciones más comunes en los accidentes (hora del día, condiciones climáticas, etc)"
-    });
+//Retrieves accidents most common conditions (temperature, time, etc.).
+router.get('/mostCommonConditions/weather', (req, res) => {
+    accidents.findMostCommonWeatherConditions(results => res.send(results))
 });
 
 //Receives a geoPoint (latitude and longitude) and a radius (in km) and retrieves all the accidentes in that area.
@@ -49,8 +45,8 @@ router.get('/mostDangerousPoints', (req, res) => {
     }
 });
 
+// Retrieves the average distance of accidents
 router.get('/averageDistance', (req, res) => {
-    // "obtener la distancia promedio desde el inicio al fin del accidente"
     accidents.findAverageDistance((results) => {
         res.send(results);
     })

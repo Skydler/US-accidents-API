@@ -29,7 +29,7 @@ function findAverageDistance(callback) {
     ];
     connection.Accidents.aggregate(aggregation, (err, res) => {
         if (err) { throw err }
-        callback(res)
+        callback(res);
     })
 }
 
@@ -87,9 +87,25 @@ function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback
     });
 }
 
+function findMostCommonWeatherConditions(callback) {
+    const limit = 5;
+    const weatherQuery = [{ $sortByCount: "$Weather_Condition" }, { $limit: limit }]
+    const visibilityQuery = [{ $sortByCount: "$Visibility(mi)" }, { $limit: limit }]
+    const tempQuery = [{ $sortByCount: "$Temperature(F)" }, { $limit: limit }]
+    const windQuery = [{ $sortByCount: "$Wind_Direction" }, { $limit: limit }]
+
+    Promise.all([
+        connection.Accidents.aggregate(weatherQuery).exec(),
+        connection.Accidents.aggregate(tempQuery).exec(),
+        connection.Accidents.aggregate(visibilityQuery).exec(),
+        connection.Accidents.aggregate(windQuery).exec(),
+    ]).then(values => callback(values))
+}
+
 module.exports = {
     findBetweenDates,
     findAccidentsWithin,
     findMostDangerousPointsWithin,
-    findAverageDistance
+    findAverageDistance,
+    findMostCommonWeatherConditions,
 };
