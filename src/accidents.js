@@ -81,10 +81,10 @@ function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback
 
 function findMostCommonWeatherConditions(callback) {
     const limit = 5;
-    const weatherQuery = [{ $sortByCount: "$Weather_Condition" }, { $limit: limit }]
-    const visibilityQuery = [{ $sortByCount: "$Visibility(mi)" }, { $limit: limit }]
-    const tempQuery = [{ $sortByCount: "$Temperature(F)" }, { $limit: limit }]
-    const windQuery = [{ $sortByCount: "$Wind_Direction" }, { $limit: limit }]
+    const weatherQuery = [{ $sortByCount: "$Weather_Condition" }, { $limit: limit }, { $project: { _id: false, weather: '$_id', count: true } }]
+    const visibilityQuery = [{ $sortByCount: "$Visibility(mi)" }, { $limit: limit }, { $project: { _id: false, "visibility(mi)": '$_id', count: true } }]
+    const tempQuery = [{ $sortByCount: "$Temperature(F)" }, { $limit: limit }, { $project: { _id: false, "temperature(F)": '$_id', count: true } }]
+    const windQuery = [{ $sortByCount: "$Wind_Direction" }, { $limit: limit }, { $project: { _id: false, windDirection: '$_id', count: true } }]
 
     Promise.all([
         connection.Accidents.aggregate(weatherQuery).exec(),
@@ -96,9 +96,9 @@ function findMostCommonWeatherConditions(callback) {
 
 function findMostCommonLocationConditions(callback) {
     const limit = 5;
-    const timeQuery = [{ $sortByCount: "$Start_Time" }, { $limit: limit }]
-    const cityQuery = [{ $sortByCount: "$City" }, { $limit: limit }]
-    const stateQuery = [{ $sortByCount: "$State" }, { $limit: limit }]
+    const timeQuery = [{ $sortByCount: "$Start_Time" }, { $limit: limit }, { $project: { _id: false, time: '$_id', count: true } }]
+    const cityQuery = [{ $sortByCount: "$City" }, { $limit: limit }, { $project: { _id: false, city: '$_id', count: true } }]
+    const stateQuery = [{ $sortByCount: "$State" }, { $limit: limit }, { $project: { _id: false, state: '$_id', count: true } }]
 
     Promise.all([
         connection.Accidents.aggregate(timeQuery).allowDiskUse(true).exec(),
@@ -109,14 +109,14 @@ function findMostCommonLocationConditions(callback) {
 
 function findMostCommonTerrainConditions(callback) {
     const limit = 5; //It's all booleans so it's kind of the same here, but I will leave it just in case
-    const crossingQuery = [{ $sortByCount: "$Crossing" }, { $limit: limit }]
-    const giveAwayQuery = [{ $sortByCount: "$Give_Way" }, { $limit: limit }]
-    const junctionQuery = [{ $sortByCount: "$Junction" }, { $limit: limit }]
-    const noExitQuery = [{ $sortByCount: "$No_Exit" }, { $limit: limit }]
-    const railWayQuery = [{ $sortByCount: "$Railway" }, { $limit: limit }]
-    const stopQuery = [{ $sortByCount: "$Stop" }, { $limit: limit }]
-    const turningLoopQuery = [{ $sortByCount: "$Turning_Loop" }, { $limit: limit }]
-    const stationQuery = [{ $sortByCount: "$Station" }, { $limit: limit }]
+    const crossingQuery = [{ $sortByCount: "$Crossing" }, { $limit: limit }, { $project: { _id: false, crossing: '$_id', count: true } }]
+    const giveAwayQuery = [{ $sortByCount: "$Give_Way" }, { $limit: limit }, { $project: { _id: false, giveAway: '$_id', count: true } }]
+    const junctionQuery = [{ $sortByCount: "$Junction" }, { $limit: limit }, { $project: { _id: false, junction: '$_id', count: true } }]
+    const noExitQuery = [{ $sortByCount: "$No_Exit" }, { $limit: limit }, { $project: { _id: false, noExit: '$_id', count: true } }]
+    const railWayQuery = [{ $sortByCount: "$Railway" }, { $limit: limit }, { $project: { _id: false, railWay: '$_id', count: true } }]
+    const stopQuery = [{ $sortByCount: "$Stop" }, { $limit: limit }, { $project: { _id: false, stop: '$_id', count: true } }]
+    const turningLoopQuery = [{ $sortByCount: "$Turning_Loop" }, { $limit: limit }, { $project: { _id: false, turningLoop: '$_id', count: true } }]
+    const stationQuery = [{ $sortByCount: "$Station" }, { $limit: limit }, { $project: { _id: false, station: '$_id', count: true } }]
 
     Promise.all([
         connection.Accidents.aggregate(crossingQuery).exec(),
