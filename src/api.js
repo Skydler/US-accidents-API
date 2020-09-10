@@ -17,6 +17,14 @@ router.get('/mostCommonConditions/weather', (req, res) => {
     accidents.findMostCommonWeatherConditions(results => res.send(results))
 });
 
+router.get('/mostCommonConditions/location', (req, res) => {
+    accidents.findMostCommonLocationConditions(results => res.send(results))
+});
+
+router.get('/mostCommonConditions/terrain', (req, res) => {
+    accidents.findMostCommonTerrainConditions(results => res.send(results))
+});
+
 //Receives a geoPoint (latitude and longitude) and a radius (in km) and retrieves all the accidentes in that area.
 router.get('/accidentsWithin', (req, res) => {
     const longitude = req.query.longitude;

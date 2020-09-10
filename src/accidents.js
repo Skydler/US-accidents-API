@@ -102,10 +102,48 @@ function findMostCommonWeatherConditions(callback) {
     ]).then(values => callback(values))
 }
 
+function findMostCommonLocationConditions(callback) {
+    const limit = 5;
+    const timeQuery = [{ $sortByCount: "$Start_Time" }, { $limit: limit }]
+    const cityQuery = [{ $sortByCount: "$City" }, { $limit: limit }]
+    const stateQuery = [{ $sortByCount: "$State" }, { $limit: limit }]
+
+    Promise.all([
+        connection.Accidents.aggregate(timeQuery).allowDiskUse(true).exec(),
+        connection.Accidents.aggregate(cityQuery).allowDiskUse(true).exec(),
+        connection.Accidents.aggregate(stateQuery).allowDiskUse(true).exec(),
+    ]).then(values => callback(values))
+}
+
+function findMostCommonTerrainConditions(callback) {
+    const limit = 5; //It's all booleans so it's kind of the same here, but I will leave it just in case
+    const crossingQuery = [{ $sortByCount: "$Crossing" }, { $limit: limit }]
+    const giveAwayQuery = [{ $sortByCount: "$Give_Way" }, { $limit: limit }]
+    const junctionQuery = [{ $sortByCount: "$Junction" }, { $limit: limit }]
+    const noExitQuery = [{ $sortByCount: "$No_Exit" }, { $limit: limit }]
+    const railWayQuery = [{ $sortByCount: "$Railway" }, { $limit: limit }]
+    const stopQuery = [{ $sortByCount: "$Stop" }, { $limit: limit }]
+    const turningLoopQuery = [{ $sortByCount: "$Turning_Loop" }, { $limit: limit }]
+    const stationQuery = [{ $sortByCount: "$Station" }, { $limit: limit }]
+
+    Promise.all([
+        connection.Accidents.aggregate(crossingQuery).exec(),
+        connection.Accidents.aggregate(giveAwayQuery).exec(),
+        connection.Accidents.aggregate(junctionQuery).exec(),
+        connection.Accidents.aggregate(noExitQuery).exec(),
+        connection.Accidents.aggregate(railWayQuery).exec(),
+        connection.Accidents.aggregate(stopQuery).exec(),
+        connection.Accidents.aggregate(turningLoopQuery).exec(),
+        connection.Accidents.aggregate(stationQuery).exec(),
+    ]).then(values => callback(values))
+}
+
 module.exports = {
     findBetweenDates,
     findAccidentsWithin,
     findMostDangerousPointsWithin,
     findAverageDistance,
+    findMostCommonLocationConditions,
     findMostCommonWeatherConditions,
+    findMostCommonTerrainConditions,
 };
