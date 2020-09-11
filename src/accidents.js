@@ -1,4 +1,5 @@
 const connection = require('./connection.js');
+const parser = require('./parser.js');
 
 function findBetweenDates(startDate, endDate, callback) {
     const query = {
@@ -80,7 +81,7 @@ function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback
 }
 
 function findMostCommonWeatherConditions(callback) {
-    const limit = 5;
+        const limit = 5;
     const weatherQuery = [{ $sortByCount: "$Weather_Condition" }, { $limit: limit }, { $project: { _id: false, weather: '$_id', count: true } }]
     const visibilityQuery = [{ $sortByCount: "$Visibility(mi)" }, { $limit: limit }, { $project: { _id: false, "visibility(mi)": '$_id', count: true } }]
     const tempQuery = [{ $sortByCount: "$Temperature(F)" }, { $limit: limit }, { $project: { _id: false, "temperature(F)": '$_id', count: true } }]
@@ -91,7 +92,7 @@ function findMostCommonWeatherConditions(callback) {
         connection.Accidents.aggregate(tempQuery).exec(),
         connection.Accidents.aggregate(visibilityQuery).exec(),
         connection.Accidents.aggregate(windQuery).exec(),
-    ]).then(values => callback(values))
+    ]).then(values => callback(parser.parseWeatherConditions(values)));
 }
 
 function findMostCommonLocationConditions(callback) {
@@ -104,7 +105,7 @@ function findMostCommonLocationConditions(callback) {
         connection.Accidents.aggregate(timeQuery).allowDiskUse(true).exec(),
         connection.Accidents.aggregate(cityQuery).exec(),
         connection.Accidents.aggregate(stateQuery).exec(),
-    ]).then(values => callback(values))
+    ]).then(values => callback(parser.parseLocationConditions(values)));
 }
 
 function findMostCommonTerrainConditions(callback) {
@@ -127,7 +128,7 @@ function findMostCommonTerrainConditions(callback) {
         connection.Accidents.aggregate(stopQuery).exec(),
         connection.Accidents.aggregate(turningLoopQuery).exec(),
         connection.Accidents.aggregate(stationQuery).exec(),
-    ]).then(values => callback(values))
+    ]).then(values => callback(parser.parseTerrainConditions(values)));
 }
 
 module.exports = {
