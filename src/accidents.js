@@ -82,14 +82,14 @@ function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback
 
 function findMostCommonWeatherConditions(callback) {
     const weatherQuery = constructCommonQuery("Weather_Condition");
-    const visibilityQuery = constructCommonQuery("Visibility");
-    const tempQuery = constructCommonQuery("Temperature");
+    const visibilityQuery = constructCommonQuery("Visibility(mi)");
+    const tempQuery = constructCommonQuery("Temperature(F)");
     const windQuery = constructCommonQuery("Wind_Direction");
 
     Promise.all([
         connection.Accidents.aggregate(weatherQuery).exec(),
-        connection.Accidents.aggregate(tempQuery).exec(),
         connection.Accidents.aggregate(visibilityQuery).exec(),
+        connection.Accidents.aggregate(tempQuery).exec(),
         connection.Accidents.aggregate(windQuery).exec(),
     ]).then(values => callback(parser.parseWeatherConditions(values)));
 }
