@@ -1,67 +1,40 @@
 const connection = require('./connection.js');
 const parser = require('./parser.js');
 
-function findBetweenDates(startDate, endDate, callback) {
-    const query = {
-        $and: [
-            { Start_Time: { $gte: startDate } },
-            { End_Time: { $lte: endDate } }
-        ]
+function findBetweenDates(startDate, endDate, callback, limit) {
+    let query = connection.Accidents.find().and([
+        { Start_Time: { $gte: startDate } },
+        { End_Time: { $lte: endDate } },
+    ])
+    if (limit !== undefined) {
+        query = query.limit(limit);
     }
-    connection.Accidents.find(query, (err, res) => {
-        if (err) { throw err }
-        callback(res)
+    query.exec((err, res) => { callback(res) });
+}
+
+function findAccidentsWithin({ longitude, latitude }, radius, callback, limit) {
+    const queryStartLoc = connection.Accidents.find().near('Start_Loc', {
+        center: { type: "Point", coordinates: [longitude, latitude] },
+        maxDistance: radius * 1000,
+    });
+    const queryEndLoc = connection.Accidents.find().near('End_Loc', {
+        center: { type: "Point", coordinates: [longitude, latitude] },
+        maxDistance: radius * 1000,
+    });
+
+    Promise.all([
+        queryStartLoc.exec(),
+        queryEndLoc.exec(),
+    ]).then(results => {
+        let accidents_array = Object.assign(results[0], results[1]);
+        if (limit !== undefined) {
+            accidents_array = accidents_array.slice(0, limit);
+        }
+        callback(accidents_array);
     });
 }
 
-function findAverageDistance(callback) {
-    const aggregation = [
-        {
-            $group: {
-                _id: null, average: { $avg: '$Distance(mi)' }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                average: 1
-            }
-        }
-    ];
-    connection.Accidents.aggregate(aggregation, (err, res) => {
-        if (err) { throw err }
-        callback(res);
-    })
-}
-
-function findAccidentsWithin({ longitude, latitude }, radius, callback) {
-    let query = {
-        Start_Loc: {
-            $near: {
-                $geometry: { type: "Point", coordinates: [longitude, latitude] },
-                $maxDistance: radius * 1000
-            }
-        }
-    };
-    connection.Accidents.find(query, (err, res) => {
-        if (err) { throw err }
-        query = {
-            End_Loc: {
-                $near: {
-                    $geometry: { type: "Point", coordinates: [longitude, latitude] },
-                    $maxDistance: radius * 1000
-                }
-            }
-        };
-        const nearStartPointAccidents = res;
-        connection.Accidents.find(query, (err, res) => {
-            if (err) { throw err }
-            callback(Object.assign(res, nearStartPointAccidents));
-        });
-    });
-}
-
-function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback) {
+function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback, limit = 5) {
     const coords = [parseFloat(longitude), parseFloat(latitude)]
     const radiusToKm = radius * 1000;
 
@@ -73,11 +46,22 @@ function findMostDangerousPointsWithin({ longitude, latitude }, radius, callback
             key: "Start_Loc"
         })
         .sortByCount("Start_Loc.coordinates")
-        .limit(5)
+        .limit(limit)
         .exec((err, res) => {
             if (err) { throw err }
             callback(res);
         });
+}
+
+function findAverageDistance(callback) {
+    const aggregation = [
+        { $group: { _id: null, average: { $avg: '$Distance(mi)' } } },
+        { $project: { _id: 0, average: 1 } }
+    ];
+    connection.Accidents.aggregate(aggregation, (err, res) => {
+        if (err) { throw err }
+        callback(res);
+    })
 }
 
 function findMostCommonWeatherConditions(callback) {
