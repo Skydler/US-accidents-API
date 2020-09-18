@@ -14,6 +14,13 @@ db.once('open', () => {
     console.info("Connected!!");
 });
 
+process.on('SIGINT', function () {
+    mongoose.disconnect(function () {
+        console.log('Mongoose disconnected on app termination');
+        process.exit(0);
+    });
+});
+
 // db.accidents.update(
 //     {},
 //     [

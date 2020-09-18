@@ -13,14 +13,22 @@ function findBetweenDates(startDate, endDate, callback, limit) {
 }
 
 function findAccidentsWithin({ longitude, latitude }, radius, callback, limit) {
-    const queryStartLoc = connection.Accidents.find().near('Start_Loc', {
+    let queryStartLoc = connection.Accidents.find().near('Start_Loc', {
         center: { type: "Point", coordinates: [longitude, latitude] },
         maxDistance: radius * 1000,
     });
-    const queryEndLoc = connection.Accidents.find().near('End_Loc', {
+    let queryEndLoc = connection.Accidents.find().near('End_Loc', {
         center: { type: "Point", coordinates: [longitude, latitude] },
         maxDistance: radius * 1000,
     });
+
+    // Made "limit*2" in case one of the querys doesnt return all possible documents
+    // Then after the promise is resolved I take the desired quantity.
+    // Couldn't figure out how to make geospatial query by two fields.
+    if (limit !== undefined) {
+       queryStartLoc = queryStartLoc.limit(limit*2);
+       queryEndLoc = queryEndLoc.limit(limit*2);
+    }
 
     Promise.all([
         queryStartLoc.exec(),
