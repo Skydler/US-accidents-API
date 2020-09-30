@@ -36,7 +36,7 @@ Returns the accidents within a certain area.
 Parameters:
 - longitude: a longitude (for example, '-84.058723')
 - latitude: a latitude (for example, '39.865147')
-- radius: a radius
+- radius: a radius (in km)
 - limit: used to limit the returned documents
 
 ### **/mostDangerousPoints**
@@ -44,7 +44,7 @@ Returns the most dangerous points within a certain area.
 Parameters:
 - longitude: a longitude (for example, '-84.058723')
 - latitude: a latitude (for example, '39.865147')
-- radius: a radius
+- radius: a radius (in km)
 - limit: used to limit the returned documents
 
 ### **/averageDistance**
