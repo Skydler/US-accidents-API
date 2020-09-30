@@ -61,3 +61,5 @@ Returns the most common terrain conditions.
 
 ## Clarifications
 We had to modify the Mongo collection schema by adding two geo points to all the accidents. Some of them already had an end point, but in those cases where they don't, we used the start point.
+
+We used both the start and the end point to determine if an accident happened in a certain area.
