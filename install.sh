@@ -11,11 +11,11 @@ db.accidents.updateMany(
     [
         {
             $set: {
-                Loc_start: {
+                Start_Loc: {
                     type: "Point",
                     coordinates: ["$Start_Lng", "$Start_Lat"]
                 },
-                Loc_end: {
+                End_Loc: {
                     type: "Point",
                     coordinates: {
                         $cond: [
@@ -32,8 +32,8 @@ db.accidents.updateMany(
     ]
 );
 
-db.accidents.createIndex({Loc_start: "2dsphere"})
-db.accidents.createIndex({Loc_end: "2dsphere"})
+db.accidents.createIndex({Start_Loc: "2dsphere"})
+db.accidents.createIndex({End_Loc: "2dsphere"})
 '
 
 echo -e "Importing $file_csv...\n"
